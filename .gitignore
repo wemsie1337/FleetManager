@@ -1,0 +1,29 @@
+# Visual Studio / .NET
+.vs/
+bin/
+obj/
+publish/
+Backup/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.log
+UpgradeLog*.htm
+
+# ReSharper / Rider
+.idea/
+_ReSharper*/
+*.DotSettings.user
+
+# Тестовые и временные данные
+TestResults/
+*.tmp
+*.bak
+*.mdf
+*.ldf
+
+# ОС
+Thumbs.db
+desktop.ini
+.DS_Store
