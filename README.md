@@ -135,7 +135,8 @@ FleetManager.sln
 │   └── FleetManagerDB.sql        # полный скрипт БД: схема, seed, триггеры, SP
 ├── docs/
 │   ├── ARCHITECTURE.md           # архитектура, модель данных, ключевые сценарии
-│   └── USER_GUIDE.md             # краткое руководство пользователя
+│   ├── USER_GUIDE.md             # краткое руководство пользователя
+│   └── diagrams/                 # UML и ER-диаграммы (PlantUML: .puml + .png)
 └── src/
     ├── FleetManager.Core/        # модели, enum, настройки (без зависимостей)
     ├── FleetManager.Data/        # ADO.NET + Dapper, репозитории, DatabaseContext

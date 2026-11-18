@@ -1,0 +1,230 @@
+@startuml Class-Autopark
+' ============================================================
+'  ИС «Автопарк» — диаграмма классов: доменная модель
+'  Слои приложения — см. class-diagram-architecture.puml
+' ============================================================
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam nodesep 25
+skinparam ranksep 70
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #2F6DB5
+  ArrowColor #4A6E9B
+}
+hide empty members
+
+package "FleetManager.Core · доменные модели" as Core {
+
+  enum UserRole {
+    Admin = 1
+    Dispatcher = 2
+    Driver = 3
+  }
+
+  enum VehicleState {
+    OnLine = 1
+    InRepair = 2
+    InMaintenance = 3
+    Retired = 4
+  }
+
+  enum RouteState {
+    Planned = 1
+    InProgress = 2
+    Completed = 3
+    Cancelled = 4
+  }
+
+  class Role {
+    +Id : int
+    +RoleName : string
+    +Description : string?
+  }
+
+  class User {
+    +Id : int
+    +Login : string
+    +PasswordHash : string
+    +Salt : string
+    +FullName : string
+    +RoleId : int
+    +IsActive : bool
+    +CreatedAt : DateTime
+    +LastLoginAt : DateTime?
+    +DriverId : int?
+    +Role : UserRole {readOnly}
+    +Initials : string {readOnly}
+  }
+
+  class Driver {
+    +Id : int
+    +UserId : int?
+    +FullName : string
+    +LicenseNumber : string
+    +Category : string
+    +HireDate : DateTime
+    +Phone : string
+    +IsActive : bool
+  }
+
+  class Vehicle {
+    +Id : int
+    +BrandId : int
+    +BrandName : string
+    +Model : string
+    +PlateNumber : string
+    +Vin : string?
+    +Year : int
+    +CurrentMileage : int
+    +StatusId : int
+    +FuelTypeId : int
+    +PlannedConsumption : decimal?
+    +PurchaseDate : DateTime?
+    +Notes : string?
+    +DisplayName : string {readOnly}
+    +State : VehicleState {readOnly}
+  }
+
+  class VehicleBrand {
+    +Id : int
+    +BrandName : string
+  }
+
+  class VehicleStatus {
+    +Id : int
+    +StatusName : string
+    +ColorHex : string
+  }
+
+  class FuelType {
+    +Id : int
+    +FuelName : string
+    +PricePerLiter : decimal
+  }
+
+  class Route {
+    +Id : int
+    +DriverId : int
+    +VehicleId : int
+    +StartPoint : string
+    +EndPoint : string
+    +PlannedMileage : int
+    +StartDate : DateTime
+    +EndDate : DateTime?
+    +Status : int
+    +Notes : string?
+    +StatusName : string {readOnly}
+  }
+
+  class MileageLog {
+    +Id : int
+    +VehicleId : int
+    +DriverId : int
+    +OdometerStart : int
+    +OdometerEnd : int
+    +TripMileage : int
+    +Date : DateTime
+    +Note : string?
+    +CreatedByUserId : int?
+    +CreatedAt : DateTime
+  }
+
+  class FuelRecord {
+    +Id : int
+    +VehicleId : int
+    +Date : DateTime
+    +Liters : decimal
+    +CostPerLiter : decimal
+    +TotalCost : decimal
+    +Odometer : int
+    +DriverId : int?
+  }
+
+  class Fine {
+    +Id : int
+    +VehicleId : int
+    +DriverId : int?
+    +Date : DateTime
+    +Amount : decimal
+    +Description : string
+    +IsPaid : bool
+    +PaidDate : DateTime?
+    +IncidentType : string
+    +IncidentTypeName : string {readOnly}
+  }
+
+  class MaintenanceType {
+    +Id : int
+    +TypeName : string
+    +IntervalKm : int
+    +Description : string?
+  }
+
+  class VehicleMaintenancePlan {
+    +Id : int
+    +VehicleId : int
+    +MaintenanceTypeId : int
+    +IntervalKm : int
+    +LastServiceMileage : int
+    +LastServiceDate : DateTime?
+    +IsActive : bool
+    +NextDueMileage : int {readOnly}
+  }
+
+  class MaintenanceRecord {
+    +Id : int
+    +VehicleId : int
+    +MaintenanceTypeId : int
+    +Date : DateTime
+    +MileageAtService : int
+    +Cost : decimal
+    +Performer : string
+    +Notes : string?
+    +CreatedByUserId : int?
+    +CreatedAt : DateTime
+  }
+
+  class MaintenanceAlert {
+    +Id : int
+    +VehicleId : int
+    +MaintenanceTypeId : int
+    +DueMileage : int
+    +Severity : string
+    +IsAcknowledged : bool
+    +CreatedAt : DateTime
+    +AcknowledgedAt : DateTime?
+  }
+}
+
+' ================== Ассоциации ==================
+User "1" --> "1" Role : роль
+Driver "0..1" --> "0..1" User : учётная запись
+Vehicle --> VehicleBrand
+Vehicle --> VehicleStatus
+Vehicle --> FuelType
+Route --> Driver
+Route --> Vehicle
+MileageLog --> Vehicle
+MileageLog --> Driver
+MileageLog --> User : создал
+FuelRecord --> Vehicle
+FuelRecord --> Driver
+Fine --> Vehicle
+Fine --> Driver
+VehicleMaintenancePlan --> Vehicle
+VehicleMaintenancePlan --> MaintenanceType
+MaintenanceRecord --> Vehicle
+MaintenanceRecord --> MaintenanceType
+MaintenanceRecord --> User : создал
+MaintenanceAlert --> Vehicle
+MaintenanceAlert --> MaintenanceType
+
+' ================== Использование перечислений ==================
+User ..> UserRole
+Vehicle ..> VehicleState
+Route ..> RouteState
+
+@enduml

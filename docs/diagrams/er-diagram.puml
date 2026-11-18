@@ -1,0 +1,258 @@
+@startuml ER-Autopark
+' ============================================================
+'  ИС «Автопарк» — ER-диаграмма базы данных FleetManagerDB
+'  Нотация «воронья лапка» (crow's foot)
+' ============================================================
+title ER-диаграмма БД «Автопарк» (SQL Server)
+
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam linetype ortho
+skinparam entity {
+  BackgroundColor #FFFFFF
+  BorderColor #2F6DB5
+  HeaderBackgroundColor #EAF2FB
+  HeaderBorderColor #2F6DB5
+  FontColor #1F2937
+}
+hide circle
+hide methods
+
+' ---------------- Справочники ----------------
+
+entity "dbo.Roles" as Roles {
+  * Id : INT <<PK>>
+  --
+  * RoleName : NVARCHAR(50) <<UQ>>
+  Description : NVARCHAR(255)
+}
+
+entity "dbo.VehicleStatuses" as VehicleStatuses {
+  * Id : INT <<PK>>
+  --
+  * StatusName : NVARCHAR(50) <<UQ>>
+  * ColorHex : VARCHAR(7)
+}
+
+entity "dbo.VehicleBrands" as VehicleBrands {
+  * Id : INT <<PK>>
+  --
+  * BrandName : NVARCHAR(80) <<UQ>>
+}
+
+entity "dbo.FuelTypes" as FuelTypes {
+  * Id : INT <<PK>>
+  --
+  * FuelName : NVARCHAR(50) <<UQ>>
+  * PricePerLiter : DECIMAL(10,2)
+}
+
+entity "dbo.MaintenanceTypes" as MaintenanceTypes {
+  * Id : INT <<PK>>
+  --
+  * TypeName : NVARCHAR(100) <<UQ>>
+  * IntervalKm : INT
+  Description : NVARCHAR(500)
+}
+
+' ---------------- Пользователи и водители ----------------
+
+entity "dbo.Users" as Users {
+  * Id : INT <<PK>>
+  --
+  * Login : NVARCHAR(64) <<UQ>>
+  * PasswordHash : CHAR(64)
+  * Salt : VARCHAR(64)
+  * FullName : NVARCHAR(150)
+  * RoleId : INT <<FK>>
+  * IsActive : BIT
+  * CreatedAt : DATETIME2
+  LastLoginAt : DATETIME2
+}
+
+entity "dbo.Drivers" as Drivers {
+  * Id : INT <<PK>>
+  --
+  UserId : INT <<FK>>
+  * LicenseNumber : NVARCHAR(30) <<UQ>>
+  * Category : NVARCHAR(10)
+  * HireDate : DATE
+  * Phone : NVARCHAR(30)
+  * IsActive : BIT
+}
+
+' ---------------- Транспорт ----------------
+
+entity "dbo.Vehicles" as Vehicles {
+  * Id : INT <<PK>>
+  --
+  * BrandId : INT <<FK>>
+  * Model : NVARCHAR(80)
+  * PlateNumber : NVARCHAR(20) <<UQ>>
+  Vin : NVARCHAR(17)
+  * Year : INT
+  * CurrentMileage : INT
+  * StatusId : INT <<FK>>
+  * FuelTypeId : INT <<FK>>
+  PlannedConsumption : DECIMAL(6,2)
+  PurchaseDate : DATE
+  Notes : NVARCHAR(1000)
+  * CreatedAt : DATETIME2
+  * UpdatedAt : DATETIME2
+}
+
+' ---------------- Эксплуатация ----------------
+
+entity "dbo.Routes" as Routes {
+  * Id : INT <<PK>>
+  --
+  * DriverId : INT <<FK>>
+  * VehicleId : INT <<FK>>
+  * StartPoint : NVARCHAR(200)
+  * EndPoint : NVARCHAR(200)
+  * PlannedMileage : INT
+  * StartDate : DATETIME2
+  EndDate : DATETIME2
+  * Status : TINYINT
+  Notes : NVARCHAR(500)
+  * CreatedAt : DATETIME2
+}
+
+entity "dbo.MileageLogs" as MileageLogs {
+  * Id : INT <<PK>>
+  --
+  * VehicleId : INT <<FK>>
+  * DriverId : INT <<FK>>
+  * OdometerStart : INT
+  * OdometerEnd : INT
+  TripMileage : INT <<computed>>
+  * Date : DATE
+  Note : NVARCHAR(500)
+  CreatedByUserId : INT <<FK>>
+  * CreatedAt : DATETIME2
+}
+
+entity "dbo.FuelRecords" as FuelRecords {
+  * Id : INT <<PK>>
+  --
+  * VehicleId : INT <<FK>>
+  * Date : DATE
+  * Liters : DECIMAL(10,2)
+  * CostPerLiter : DECIMAL(10,2)
+  TotalCost : DECIMAL(21,4) <<computed>>
+  * Odometer : INT
+  DriverId : INT <<FK>>
+  * CreatedAt : DATETIME2
+}
+
+entity "dbo.Fines" as Fines {
+  * Id : INT <<PK>>
+  --
+  * VehicleId : INT <<FK>>
+  DriverId : INT <<FK>>
+  * Date : DATE
+  * Amount : DECIMAL(12,2)
+  * Description : NVARCHAR(1000)
+  * IsPaid : BIT
+  PaidDate : DATE
+  * IncidentType : VARCHAR(20)
+  * CreatedAt : DATETIME2
+}
+
+' ---------------- Техническое обслуживание ----------------
+
+entity "dbo.VehicleMaintenancePlans" as VehicleMaintenancePlans {
+  * Id : INT <<PK>>
+  --
+  * VehicleId : INT <<FK>>
+  * MaintenanceTypeId : INT <<FK>>
+  * IntervalKm : INT
+  * LastServiceMileage : INT
+  LastServiceDate : DATE
+  * IsActive : BIT
+}
+
+entity "dbo.MaintenanceRecords" as MaintenanceRecords {
+  * Id : INT <<PK>>
+  --
+  * VehicleId : INT <<FK>>
+  * MaintenanceTypeId : INT <<FK>>
+  * Date : DATE
+  * MileageAtService : INT
+  * Cost : DECIMAL(12,2)
+  * Performer : NVARCHAR(150)
+  Notes : NVARCHAR(1000)
+  AttachmentPath : NVARCHAR(500)
+  CreatedByUserId : INT <<FK>>
+  * CreatedAt : DATETIME2
+}
+
+entity "dbo.MaintenanceAlerts" as MaintenanceAlerts {
+  * Id : INT <<PK>>
+  --
+  * VehicleId : INT <<FK>>
+  * MaintenanceTypeId : INT <<FK>>
+  * DueMileage : INT
+  * Severity : NVARCHAR(20)
+  * IsAcknowledged : BIT
+  * CreatedAt : DATETIME2
+  AcknowledgedAt : DATETIME2
+}
+
+' ---------------- Аудит ----------------
+
+entity "dbo.AuditLog" as AuditLog {
+  * Id : BIGINT <<PK>>
+  --
+  UserId : INT <<FK>>
+  * Action : NVARCHAR(100)
+  * TableName : NVARCHAR(100)
+  RecordId : NVARCHAR(50)
+  OldValue : NVARCHAR(MAX)
+  NewValue : NVARCHAR(MAX)
+  * Timestamp : DATETIME2
+}
+
+' ================== Связи ==================
+
+Roles ||--o{ Users : "RoleId"
+Users |o--o| Drivers : "UserId"
+
+VehicleBrands ||--o{ Vehicles : "BrandId"
+VehicleStatuses ||--o{ Vehicles : "StatusId"
+FuelTypes ||--o{ Vehicles : "FuelTypeId"
+
+Drivers ||--o{ Routes : "DriverId"
+Vehicles ||--o{ Routes : "VehicleId"
+
+Vehicles ||--o{ MileageLogs : "VehicleId"
+Drivers ||--o{ MileageLogs : "DriverId"
+Users |o--o{ MileageLogs : "CreatedByUserId"
+
+Vehicles ||--o{ FuelRecords : "VehicleId"
+Drivers |o--o{ FuelRecords : "DriverId"
+
+Vehicles ||--o{ Fines : "VehicleId"
+Drivers |o--o{ Fines : "DriverId"
+
+Vehicles ||--o{ VehicleMaintenancePlans : "VehicleId"
+MaintenanceTypes ||--o{ VehicleMaintenancePlans : "MaintenanceTypeId"
+
+Vehicles ||--o{ MaintenanceRecords : "VehicleId"
+MaintenanceTypes ||--o{ MaintenanceRecords : "MaintenanceTypeId"
+Users |o--o{ MaintenanceRecords : "CreatedByUserId"
+
+Vehicles ||--o{ MaintenanceAlerts : "VehicleId"
+MaintenanceTypes ||--o{ MaintenanceAlerts : "MaintenanceTypeId"
+
+Users |o--o{ AuditLog : "UserId"
+
+note bottom of Vehicles
+  Представления: vw_Vehicles, vw_MaintenanceDue.
+  Хранимые процедуры: sp_GetFleetKpi, sp_GetMaintenanceDue,
+  sp_RefreshMaintenanceAlerts, sp_GetMonthlyCosts,
+  sp_GetFuelConsumption, sp_GetVehicleMileageSummary,
+  sp_GetAuditLog.
+end note
+
+@enduml

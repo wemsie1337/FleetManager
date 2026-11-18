@@ -279,3 +279,28 @@ MainForm.OnLoad
 - GPS/ГЛОНАСС, путевые листы, мобильный кабинет;
 - отчёты по рентабельности и прогноз бюджета;
 - миграции БД (EF Core/DbUp), автотесты, установщик и автообновление.
+
+## 15. Диаграммы
+
+Исходники PlantUML — в каталоге [`docs/diagrams`](diagrams), готовые PNG — рядом с ними.
+
+| Диаграмма | Исходник | Изображение |
+| --- | --- | --- |
+| Варианты использования | [`use-case.puml`](diagrams/use-case.puml) | [`use-case.png`](diagrams/use-case.png) |
+| Классы: доменная модель | [`class-diagram.puml`](diagrams/class-diagram.puml) | [`class-diagram.png`](diagrams/class-diagram.png) |
+| Классы: слоистая архитектура | [`class-diagram-architecture.puml`](diagrams/class-diagram-architecture.puml) | [`class-diagram-architecture.png`](diagrams/class-diagram-architecture.png) |
+| ER-модель БД | [`er-diagram.puml`](diagrams/er-diagram.puml) | [`er-diagram.png`](diagrams/er-diagram.png) |
+
+![Диаграмма вариантов использования](diagrams/use-case.png)
+
+![Диаграмма классов: доменная модель](diagrams/class-diagram.png)
+
+![ER-диаграмма базы данных](diagrams/er-diagram.png)
+
+Чтобы открыть или отредактировать диаграмму, вставьте содержимое `.puml`
+в [онлайн-редактор PlantUML](https://www.plantuml.com/plantuml/uml/) либо
+отрисуйте локально:
+
+```powershell
+java -jar plantuml.jar -tpng docs\diagrams\use-case.puml
+```

@@ -1,0 +1,97 @@
+@startuml UseCase-Autopark
+' ============================================================
+'  ИС «Автопарк» — диаграмма вариантов использования
+'  Рендер: PlantUML (https://www.plantuml.com/plantuml)
+' ============================================================
+left to right direction
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam nodesep 20
+skinparam ranksep 60
+skinparam usecase {
+  BackgroundColor #EAF2FB
+  BorderColor #2F6DB5
+  ArrowColor #4A6E9B
+}
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #2F6DB5
+}
+skinparam rectangle {
+  BackgroundColor #FBFCFE
+  BorderColor #C3D3E8
+}
+
+actor "Водитель" as Driver
+actor "Диспетчер" as Dispatcher
+actor "Администратор" as Admin
+actor "Таймер ТО\n(система)" as Timer
+
+Admin -down-|> Dispatcher
+
+rectangle "ИС «Автопарк»" {
+
+  ' -------- основные варианты --------
+  usecase "Войти в систему" as UC_Login
+  usecase "Сменить пароль" as UC_Pwd
+  usecase "Просмотреть показатели\nдашборда" as UC_Dashboard
+
+  usecase "Управлять транспортом" as UC_Vehicles
+  usecase "Управлять водителями" as UC_Drivers
+  usecase "Планировать маршруты" as UC_Routes
+  usecase "Вести учёт пробега" as UC_Mileage
+  usecase "Вести учёт топлива" as UC_Fuel
+  usecase "Вести учёт штрафов\nи ДТП" as UC_Fines
+
+  usecase "Обслуживать транспорт" as UC_Maint
+  usecase "Просмотреть ТО,\nисторию и уведомления" as UC_MaintView
+  usecase "Формировать отчёты" as UC_Reports
+  usecase "Администрировать\nсистему" as UC_Admin
+  usecase "Контролировать\nсроки ТО" as UC_Check
+
+  ' -------- детализация (include) --------
+  usecase "Настроить план ТО" as UC_Plan
+  usecase "Зарегистрировать\nТО / ремонт" as UC_Record
+  usecase "Сформировать\nуведомления" as UC_Alerts
+  usecase "Управлять\nпользователями" as UC_Users
+  usecase "Просмотреть журнал\nаудита" as UC_Audit
+  usecase "Экспорт в Excel / PDF" as UC_Export
+}
+
+' ---------- Водитель ----------
+Driver --> UC_Login
+Driver --> UC_Pwd
+Driver --> UC_Dashboard
+Driver --> UC_Routes
+Driver --> UC_Mileage
+Driver --> UC_MaintView
+
+' ---------- Диспетчер ----------
+Dispatcher --> UC_Login
+Dispatcher --> UC_Pwd
+Dispatcher --> UC_Dashboard
+Dispatcher --> UC_Vehicles
+Dispatcher --> UC_Drivers
+Dispatcher --> UC_Routes
+Dispatcher --> UC_Mileage
+Dispatcher --> UC_Fuel
+Dispatcher --> UC_Fines
+Dispatcher --> UC_Maint
+Dispatcher --> UC_MaintView
+Dispatcher --> UC_Reports
+
+' ---------- Администратор (наследует права диспетчера) ----------
+Admin --> UC_Admin
+
+' ---------- Таймер (система) ----------
+Timer --> UC_Check
+
+' ---------- Детализация ----------
+UC_Maint ..> UC_Plan : <<include>>
+UC_Maint ..> UC_Record : <<include>>
+UC_Check ..> UC_Alerts : <<include>>
+UC_Admin ..> UC_Users : <<include>>
+UC_Admin ..> UC_Audit : <<include>>
+UC_Reports ..> UC_Export : <<include>>
+
+@enduml

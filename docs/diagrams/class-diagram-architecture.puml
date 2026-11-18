@@ -1,0 +1,124 @@
+@startuml Class-Architecture
+' ============================================================
+'  ИС «Автопарк» — диаграмма классов: слоистая архитектура
+'  (дополнение к class-diagram.puml)
+' ============================================================
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam nodesep 20
+skinparam ranksep 60
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #2F6DB5
+  ArrowColor #4A6E9B
+}
+hide empty members
+
+package "FleetManager.UI · представление" as UI {
+
+  class Program <<static>>
+  class LoginForm
+  class MainForm
+  abstract class BaseView
+  class DashboardView
+  class VehiclesView
+  class RoutesView
+  class MaintenanceView
+}
+
+package "FleetManager.Services · бизнес-логика" as Services {
+
+  class AppServices {
+    +Create(settings)$ : AppServices
+    +Dispose() : void
+  }
+  class SessionContext
+  class AuthService
+  class UserService
+  class VehicleService
+  class RouteService
+  class MileageService
+  class MaintenanceService
+  class FuelService
+  class FineService
+  class ReportService
+}
+
+package "FleetManager.Data · доступ к данным" as Data {
+
+  class DatabaseContext {
+    +QueryAsync(sql, params) : Task<List<T>>
+    +ExecuteAsync(sql, params) : Task<int>
+    +InTransactionAsync(work) : Task<T>
+  }
+  class UserRepository
+  class VehicleRepository
+  class RouteRepository
+  class MileageRepository
+  class MaintenanceRepository
+  class FuelRepository
+  class FineRepository
+}
+
+class "SQL Server\nFleetManagerDB" as DB <<СУБД>>
+
+' ================== Связи ==================
+Program ..> AppServices
+Program ..> LoginForm
+LoginForm --> AppServices
+MainForm --> AppServices
+
+BaseView <|-- DashboardView
+BaseView <|-- VehiclesView
+BaseView <|-- RoutesView
+BaseView <|-- MaintenanceView
+MainForm ..> BaseView
+
+AppServices o--> SessionContext
+AppServices o--> AuthService
+AppServices o--> UserService
+AppServices o--> VehicleService
+AppServices o--> RouteService
+AppServices o--> MileageService
+AppServices o--> MaintenanceService
+AppServices o--> FuelService
+AppServices o--> FineService
+AppServices o--> ReportService
+
+UserService ..> UserRepository
+VehicleService ..> VehicleRepository
+RouteService ..> RouteRepository
+MileageService ..> MileageRepository
+MaintenanceService ..> MaintenanceRepository
+FuelService ..> FuelRepository
+FineService ..> FineRepository
+
+UserRepository ..> DatabaseContext
+VehicleRepository ..> DatabaseContext
+RouteRepository ..> DatabaseContext
+MileageRepository ..> DatabaseContext
+MaintenanceRepository ..> DatabaseContext
+FuelRepository ..> DatabaseContext
+FineRepository ..> DatabaseContext
+
+DatabaseContext ..> DB : ADO.NET
+
+note right of UI
+  Также: DriversView, MileageView, FuelView,
+  FinesView, UsersView, AuditView и 8 диалогов
+  редактирования (все наследуют BaseView / BaseDialog).
+end note
+
+note bottom of Services
+  Также: LookupService, DriverService, DashboardService,
+  AuditService, MaintenanceMonitor (фоновая проверка сроков ТО).
+end note
+
+note bottom of Data
+  Также: LookupRepository, DriverRepository, AuditRepository,
+  DashboardRepository (всего 11 репозиториев).
+end note
+
+@enduml
